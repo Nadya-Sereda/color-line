@@ -1,0 +1,33 @@
+import { Game } from "./game.js";
+import { Grid } from "./grid.js";
+
+export class Level {
+  canvas = document.querySelector('.canvas');
+  totalScore = document.querySelector('.total-count');
+  levelCount = document.querySelector('.level-count');
+  goalCount = document.querySelector('.level-threshold-number');
+  levelCountNum = 1;
+  isThreshold = true;
+  constructor(rowsCount, columnsCount, cellsCount) {
+    this.levelCount.innerText = this.levelCountNum;
+    this.game = new Game(rowsCount, columnsCount, cellsCount);
+    this.grid = new Grid(this.canvas, this.game.matrix, this.game.rowsCount, this.game.columnsCount);
+    this.canvas.addEventListener('newLevelStart', event => this.levelStart())
+  }
+
+  async levelStart() {
+    this.plusCount(event.detail.countPlus);
+    const yTop = this.getCoordY();
+    await this.grid.plusCountAnimation(event.detail.countPlus, yTop);
+    this.grid = null;
+    delete this.grid;
+    this.isGoal();
+    if (this.isThreshold) {
+      this.newLevel();
+      this.grid = new Grid(this.canvas, this.game.matrix, this.game.rowsCount, this.game.columnsCount);
+      this.newGoal();
+      } else {
+        this.grid.final();
+        this.createAlert();
+      }
+    }
