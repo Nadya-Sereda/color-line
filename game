@@ -1,0 +1,238 @@
+import { getRandomInt } from "./utils.js";
+export class Game {
+  constructor(rowsCount, columnsCount, colorsCount) {
+    this.rowsCount = rowsCount;
+    this.columnsCount = columnsCount;
+    this.colorsCount = colorsCount;
+    this.newCells = [];
+    this.newCellsCount = 3;
+    this.newCellElement = document.querySelectorAll('.new-cell');
+    this.markElements = [];
+    this.gameScore = 0;
+    this.init();
+  }
+
+  init() {
+    this.matrix = new Array(this.rowsCount).fill().map(() => new Array(this.columnsCount).fill(0));
+    this.getPosition(this.matrix);
+  }
+
+  getPosition(matrix) {
+    let newCellsCount = this.newCellsCount;
+    this.newCells = [];
+    while (newCellsCount) {
+      const x = getRandomInt(0, this.rowsCount - 1);
+      const y = getRandomInt(0, this.columnsCount - 1);
+      const value = getRandomInt(1, this.colorsCount);
+  
+      const matrixElem = matrix[x][y];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+
+      let isContained = false;
+      for (const pos of this.newCells) {
+        if (pos.x === x && pos.y === y) {
+          isContained = true;
+          break
+        }
+      }
+
+      if (!matrixElem && !isContained) {
+        let pos = {x: x, y: y, value: value};
+        newCellsCount--;
+        this.newCells.push(pos);
+      }
+    }
+  }
+  
+  setNewCellColor() {
+    for (let i = 0; i < this.newCells.length; i++) {
+      let value = this.newCells[i].value;
+      this.newCellElement[i].setAttribute('id', `color${value}`);
+    }
+  }
+
+  addAtMatrix(matrix) {
+    this.newCells.forEach(elem => {
+      let x = elem.x;
+      let y = elem.y;
+      const value = elem.value;
+      const matrixElem = matrix[x][y];
+      if (matrixElem) {
+        let i = 0;
+        let neighbor = null;
+        do {
+          i = i + 1;
+         neighbor = this.findNeighbor(this.matrix, x, y, i);
+        } while (!neighbor);
+console.log(neighbor)
+        x = elem.x = neighbor.row;
+        y = elem.y = neighbor.column;
+      } 
+      matrix[x][y] = value;
+    })
+  }
+
+  isRow(row, column) {
+    return this.isVerticalRow(row, column) || this.isHorizontalRow(row, column) //|| this.isDiogonalLeftRightRow(row, column) || this.isDiogonalRightLeftRow(row, column);
+  }
+
+  isVerticalRow(row, column) {
+    const value = this.matrix[row][column];
+    let elementInRow = 1;
+    let currentRow = row - 1;
+    while (currentRow >= 0 && this.matrix[currentRow][column] === value) {
+      elementInRow++;
+      currentRow--;
+    }
+
+    currentRow = row + 1;
+    while (currentRow <= this.rowsCount - 1 && this.matrix[currentRow][column] === value) {
+      elementInRow++;
+      currentRow++;
+    }
+    return elementInRow >= 5;
+  }
+
+  isHorizontalRow(row, column) {
+    const value = this.matrix[row][column];
+    let elementInRow = 1;
+    let currentColumn = column - 1;
+    
+    while (currentColumn >= 0 && this.matrix[row][currentColumn] === value) {
+      elementInRow++;
+      currentColumn--;
+    }
+
+    currentColumn = column + 1;
+    while (currentColumn <= this.columnsCount - 1 && this.matrix[row][currentColumn] === value) {
+      elementInRow++;
+      currentColumn++;
+    }
+    if (elementInRow >= 5) {
+      return elementInRow;
+    }
+  }
+
+//   isDiogonalLeftRightRow(row, column) {
+//     const value = this.matrix[row][column];
+//     let elementInRow = 1;
+//     let currentRow = row + 1;
+//     let currentColumn = column + 1;
+//     while (currentRow <= this.rowsCount -1 
+//       || currentColumn <= this.columnsCount -1 && this.matrix[currentRow][currentColumn] === value) {
+//       elementInRow++;
+//       currentRow++;
+//       currentColumn++;
+//      
+//     currentRow = row - 1;
+//     currentColumn = column - 1;
+//     while (currentRow >= 0 
+//       || currentColumn >= 0 && this.matrix[currentRow][currentColumn] === value) {
+//       elementInRow++;
+//       currentRow--;
+//       currentColumn--;
+//     }
+//     return elementInRow >= 5;
+//   }
+// }
+// 
+//   isDiogonalRightLeftRow(row, column) {
+//     const value = this.matrix[row][column];
+//     let elementInRow = 1;
+//     let currentRow = row + 1;
+//     let currentColumn = column - 1;
+//     while (currentRow <= this.rowsCount  
+//       || currentColumn >= 0 && this.matrix[currentRow][currentColumn] === value){
+//       elementInRow++;
+//       currentRow++;
+//       currentColumn--;
+//      
+//     currentRow = row - 1;
+//     currentColumn = column + 1;
+//     while (currentRow >= 0 
+//       || currentColumn <= this.columnsCount - 1  && this.matrix[currentRow][currentColumn] === value) {
+//       elementInRow++;
+//       currentRow--;
+//       currentColumn++;
+//     }
+//     return elementInRow >= 5;
+//   }
+// }
+  newMove() {
+    this.getPosition(this.matrix);
+    this.setNewCellColor();
+  }
+
+  findNeighbor(grid, row, column, i) {
+    const isPassible = (point) => grid[point.row] && grid[point.row][point.column] === 0;
+    const getNeighbors = (point) => 
+    [
+      {row: point.row - i, column: point.column},
+      {row: point.row, column: point.column - i},
+      {row: point.row, column: point.column + i},
+      {row: point.row + i, column: point.column},
+      {row: point.row - i, column: point.column + i},
+      {row: point.row + i, column: point.column + i},
+      {row: point.row + i, column: point.column - i},
+      {row: point.row - i, column: point.column - i},
+    ].filter(isPassible);
+    let step = {row: row, column: column};
+    const neighbors = getNeighbors(step);
+    const neighbor = neighbors.find((neighbor) => grid[neighbor.row][neighbor.column] === 0);
+    return neighbor
+  }
+
+  swap(firstElement, secondElement) {
+    this.matrix[secondElement.row][secondElement.column] = this.matrix[firstElement.row][firstElement.column];
+    this.matrix[firstElement.row][firstElement.column] = 0;
+    if (this.isRow(secondElement.row, secondElement.column)) {
+      this.removeRow();
+      const swapStates = [];
+    }
+  }
+
+  removeRow() {
+    for(let row = 0; row < this.rowsCount; row++) {
+      for(let column = 0; column < this.columnsCount; column++) {
+        this.markElement(row, column); 
+      }
+    }
+  }
+
+  markElement(row, column) {
+    if (this.isRow(row, column) && this.matrix[row][column] !== 0) {
+    let mark = {row: row, column: column};
+    this.markElements.push(mark);
+    }
+  }
+
+  removeElementInMatrix() {
+    let count = 0;
+    this.markElements.forEach(elem => {
+      let row = elem.row;
+      let column = elem.column;
+      this.matrix[row][column] = 0;
+      count++
+    })
+    this.calculateScore(count);
+    this.markElements = [];
+  }
+
+  calculateScore(count) {
+    this.gameScore = this.gameScore + count;
+    return this.gameScore;
+  }
+
+  isStopGame() {
+    let countEmpty = 0;
+    for (row = 0; row < this.rowsCount; row++) {
+      for (column = 0; column < columnsCount; column++) {
+        if (matrix[row][column] === 0) {
+          countEmpty++
+        }
+      }
+    }
+    return countEmpty <= 3;
+  }
+
+ 
+}
